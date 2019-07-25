@@ -1,7 +1,13 @@
-import React, { Component } from 'react';
-import { WebView } from 'react-native';
-import { PropTypes } from 'prop-types';
-import omit from 'object.omit';
+import React, { Component } from 'react'
+import { WebView } from 'react-native'
+import { PropTypes } from 'prop-types'
+import omit from 'object.omit'
+
+const injectedJavaScript = `(function() {
+  window.postMessage = function(data) {
+    window.ReactNativeWebView.postMessage(data);
+  };
+})()`
 
 class PlaidAuthenticator extends Component {
   render() {
@@ -14,17 +20,11 @@ class PlaidAuthenticator extends Component {
       webhook,
       style,
       token
-    } = this.props;
+    } = this.props
 
-    let uri = `https://cdn.plaid.com/link/v2/stable/link.html?key=${
-      publicKey
-    }&apiVersion=v2&env=${env}&product=${product}&clientName=${
-      clientName
-    }&isWebView=true&isMobile=true&selectAccount=${
-      selectAccount
-    }`;
-    uri = token !== undefined ? `${uri}&token=${token}` : uri;
-    uri = webhook !== undefined ? `${uri}&webhook=${webhook}` : uri;
+    let uri = `https://cdn.plaid.com/link/v2/stable/link.html?key=${publicKey}&apiVersion=v2&env=${env}&product=${product}&clientName=${clientName}&isWebView=true&isMobile=true&selectAccount=${selectAccount}`
+    uri = token !== undefined ? `${uri}&token=${token}` : uri
+    uri = webhook !== undefined ? `${uri}&webhook=${webhook}` : uri
 
     return (
       <WebView
@@ -38,12 +38,13 @@ class PlaidAuthenticator extends Component {
           'token',
           'ref'
         ])}
+        injectedJavaScript={injectedJavaScript}
         ref={this.props.plaidRef}
         source={{ uri }}
         onMessage={this.onMessage}
         useWebKit
       />
-    );
+    )
   }
 
   onMessage = e => {
@@ -66,8 +67,8 @@ class PlaidAuthenticator extends Component {
       }
     */
 
-    this.props.onMessage(JSON.parse(e.nativeEvent.data));
-  };
+    this.props.onMessage(JSON.parse(e.nativeEvent.data))
+  }
 }
 
 PlaidAuthenticator.propTypes = {
@@ -78,11 +79,11 @@ PlaidAuthenticator.propTypes = {
   clientName: PropTypes.string,
   webhook: PropTypes.string,
   plaidRef: PropTypes.func
-};
+}
 
 PlaidAuthenticator.defaultProps = {
   clientName: '',
   plaidRef: () => {}
-};
+}
 
-export default PlaidAuthenticator;
+export default PlaidAuthenticator
